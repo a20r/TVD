@@ -59,6 +59,7 @@ def topo_prm(N, k, grid):
     H = nx.Graph()
     S0 = [G.nodes()[0]]
     already_seen_0 = set()
+    counter = 0
     while len(S0) > 0:
         i = S0.pop()
         print i
