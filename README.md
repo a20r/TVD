@@ -1,2 +1,1 @@
-# TopoPRM
-A topologically consistent probabilistic roadmap
+# Topological Voronoi Decomposition of an Occupancy Grid
