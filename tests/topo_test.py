@@ -1,6 +1,7 @@
 
 import os
 import sys
+import time
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -20,9 +21,11 @@ def topo_prm_sanity_test():
 
 
 def topo_vor_sanity_test():
+    # m = topoprm.read_pgm("imgs/strongly_connected.pgm")
     m = topoprm.read_pgm("imgs/bars.pgm")
-    G = topoprm.topo_vor(m)
-    topoprm.draw(G)
+    G = topoprm.topo_decomp(m)
+    topoprm.draw_path_graph(G)
+    # topoprm.draw_topo_graph(G)
     plt.imshow(m)
 
 
