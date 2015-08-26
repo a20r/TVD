@@ -17,6 +17,7 @@ def topo_vor_sanity_test():
     # tvd.draw_path_graph(G)
     tvd.draw_paths_graph(G)
     # tvd.draw_topo_graph(G)
+    plt.axis("off")
     plt.imshow(m)
 
 
