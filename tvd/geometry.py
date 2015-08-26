@@ -1,27 +1,8 @@
 
-import re
 import point
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
 import scipy.spatial as spatial
-
-
-def read_pgm(filename, byteorder='>'):
-    with open(filename, 'rb') as f:
-        buffer = f.read()
-    try:
-        header, width, height, maxval = re.search(
-            b"(^P5\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n])*"
-            b"(\d+)\s(?:\s*#.*[\r\n]\s)*)", buffer).groups()
-    except AttributeError:
-        raise ValueError("Not a raw PGM file: '%s'" % filename)
-    return np.frombuffer(
-        buffer, dtype='u1' if int(maxval) < 256 else byteorder + 'u2',
-        count=int(width) * int(height), offset=len(header))\
-        .reshape((int(height), int(width)))
 
 
 def is_grid_boundary(i, j, grid):
@@ -177,11 +158,11 @@ def topo_decomp_with_redundancy(grid, b_dist):
                         if not inner_nbr in already_seen:
                             to_search.append(inner_nbr)
     H = remove_close_nodes(G, grid, b_dist)
-    return H
+    return H, rg
 
 
 def topo_decomp(grid, b_dist=1, n_size=1):
-    rg = topo_decomp_with_redundancy(grid, b_dist)
+    rg, vor = topo_decomp_with_redundancy(grid, b_dist)
     cns = critical_nodes(rg)
     cns_set = set(cns)
     G = nx.DiGraph()
@@ -200,12 +181,13 @@ def topo_decomp(grid, b_dist=1, n_size=1):
                     if not G.has_edge(cn, node):
                         G.add_edge(cn, node, paths=list())
                     G[cn][node]["paths"].append(path)
+                    G[cn][node]["weight"] = len(path)
                     break
                 else:
                     for inner_nbr in rg.neighbors(node):
                         if not inner_nbr in already_seen:
                             to_search.append((node, inner_nbr))
-    return neighbourhood_reduction(G, n_size)
+    return neighbourhood_reduction(G, n_size), rg, vor
 
 
 def redundant_graph(grid, b_dist):
@@ -225,37 +207,3 @@ def redundant_graph(grid, b_dist):
                 G.add_node(q, position=q)
                 G.add_edge(p, q)
     return G
-
-
-def draw_topo_graph(G):
-    positions = dict()
-    for node_id in G.nodes():
-        positions[node_id] = G.node[node_id]['position'].to_list_2d()
-    nx.draw_networkx_edges(G, positions)
-    nx.draw_networkx_nodes(G, positions, node_size=30)
-
-
-def draw_path_graph(G):
-    for p, q, data in G.edges_iter(data=True):
-        plt.plot(p.x, p.y, "go")
-        plt.plot(q.x, q.y, "go")
-        xs = list()
-        ys = list()
-        for r in data["path"]:
-            xs.append(r.x)
-            ys.append(r.y)
-        plt.plot(xs, ys, "k")
-
-
-def draw_paths_graph(G):
-    for p, q, data in G.edges_iter(data=True):
-        plt.plot(p.x, p.y, "go")
-        plt.plot(q.x, q.y, "go")
-        xs = list()
-        ys = list()
-        path = data["paths"][0]
-        for path in data["paths"]:
-            for r in path:
-                xs.append(r.x)
-                ys.append(r.y)
-        plt.plot(xs, ys, "k")
