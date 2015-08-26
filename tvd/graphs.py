@@ -5,7 +5,6 @@ import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
 import scipy.spatial as spatial
-import scipy.ndimage.morphology as morph
 
 
 def read_pgm(filename, byteorder='>'):
