@@ -1,1 +1,4 @@
-# Topological Voronoi Decomposition of an Occupancy Grid
+# TVD
+Topological Voronoi Decomposition of an Occupancy Grid
+
+![Demo](imgs/demo.png)

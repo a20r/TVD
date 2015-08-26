@@ -47,21 +47,32 @@ def is_line_inside(xs, ys, grid, b_dist):
     return p_in or q_in or tc_p or tc_q
 
 
+def too_close_xs(p, rad, grid, r):
+    for dj in r:
+        if grid[p.y + rad, p.x + dj]:
+            return True
+    for dj in r:
+        if grid[p.y - rad, p.x + dj]:
+            return True
+    return False
+
+
+def too_close_ys(p, rad, grid, r):
+    for di in r:
+        if grid[p.y + di, p.x + rad]:
+            return True
+    for di in r:
+        if grid[p.y + di, p.x - rad]:
+            return True
+    return False
+
+
 def too_close(p, rad, grid):
     r = xrange(-rad, rad + 1)
     try:
-        for dj in r:
-            if grid[p.y + rad, p.x + dj]:
-                return True
-        for dj in r:
-            if grid[p.y - rad, p.x + dj]:
-                return True
-        for di in r:
-            if grid[p.y + di, p.x + rad]:
-                return True
-        for di in r:
-            if grid[p.y + di, p.x - rad]:
-                return True
+        tcx = too_close_xs(p, rad, grid, r)
+        tcy = too_close_ys(p, rad, grid, r)
+        return tcx or tcy
     except IndexError:
         return True
     return False
@@ -129,7 +140,10 @@ def redundant_path(p, q, path):
 
 
 def neighbourhood_reduction(G, k):
-    # TODO
+    ps = point.to_np_array(G.nodes())
+    tree = spatial.KDTree(ps)
+    for n in G.nodes():
+        ds, inds = tree.query(n.to_np_array_2d(), k + 1)
     return G
 
 

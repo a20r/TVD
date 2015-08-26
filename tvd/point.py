@@ -1,5 +1,6 @@
 
 import math
+import numpy as np
 import random
 
 
@@ -56,6 +57,9 @@ class Point(object):
     def to_list_2d(self):
         return [self.x, self.y]
 
+    def to_np_array_2d(self):
+        return np.array([self.x, self.y])
+
     def intify(self):
         return Point(int(self.x), int(self.y), int(self.z))
 
@@ -87,15 +91,21 @@ class Point(object):
             return False
 
 
+def to_np_array(ps):
+    arr = np.zeros((len(ps), 2))
+    for i, p in enumerate(ps):
+        arr[i][0] = p.x
+        arr[i][1] = p.y
+    return arr
+
+
 def get_random_point(width, height):
     x = random.uniform(0, width)
     y = random.uniform(0, height)
-
     return Point(x, y)
 
 
 def get_random_point_3d(width, height, altitude):
     p = get_random_point(width, height)
     p.set_z(random.randint(0, altitude))
-
     return p
