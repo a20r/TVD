@@ -75,7 +75,6 @@ def too_close(p, rad, grid):
         return tcx or tcy
     except IndexError:
         return True
-    return False
 
 
 def crow_path(p, q):
@@ -140,39 +139,72 @@ def redundant_path(p, q, path):
 
 
 def neighbourhood_reduction(G, k):
-    ps = point.to_np_array(G.nodes())
-    tree = spatial.KDTree(ps)
-    for n in G.nodes():
-        ds, inds = tree.query(n.to_np_array_2d(), k + 1)
     return G
 
 
-def topo_decomp(grid, b_dist=4, n_size=1):
+def remove_close_nodes(G, grid, b_dist):
+    H = G.copy()
+    for n in G.nodes():
+        if n in H.nodes():
+            is_leaf = len(G.neighbors(n)) == 1
+            if is_leaf and too_close(n, b_dist + 1, grid):
+                H.remove_node(n)
+    return H
+
+
+def topo_decomp_with_redundancy(grid, b_dist):
     rg = redundant_graph(grid, b_dist)
     cns = critical_nodes(rg)
     cns_set = set(cns)
-    G = nx.Graph()
+    G = nx.DiGraph()
     for cn in cns:
         for nbr in rg.neighbors(cn):
-            path = list()
+            path = [cn]
             already_seen = set()
             already_seen.add(cn)
             to_search = [nbr]
             while len(to_search) > 0:
                 node = to_search.pop()
                 already_seen.add(node)
+                path.append(node)
                 if node in cns_set:
                     path = redundant_path(cn, node, path)
                     G.add_node(cn, position=cn)
-                    G.add_node(node, position=node)
                     G.add_edge(cn, node, path=path)
-                    G.add_edge(node, cn, path=list(reversed(path)))
-                    path = list()
+                    break
                 else:
-                    path.append(node)
                     for inner_nbr in rg.neighbors(node):
                         if not inner_nbr in already_seen:
                             to_search.append(inner_nbr)
+    H = remove_close_nodes(G, grid, b_dist)
+    return H
+
+
+def topo_decomp(grid, b_dist=1, n_size=1):
+    rg = topo_decomp_with_redundancy(grid, b_dist)
+    cns = critical_nodes(rg)
+    cns_set = set(cns)
+    G = nx.DiGraph()
+    for cn in cns:
+        for nbr in rg.neighbors(cn):
+            path = list()
+            already_seen = set()
+            already_seen.add(cn)
+            to_search = [(cn, nbr)]
+            while len(to_search) > 0:
+                parent, node = to_search.pop()
+                already_seen.add(node)
+                path += rg[parent][node]["path"]
+                if node in cns_set:
+                    G.add_node(cn, position=cn)
+                    if not G.has_edge(cn, node):
+                        G.add_edge(cn, node, paths=list())
+                    G[cn][node]["paths"].append(path)
+                    break
+                else:
+                    for inner_nbr in rg.neighbors(node):
+                        if not inner_nbr in already_seen:
+                            to_search.append((node, inner_nbr))
     return neighbourhood_reduction(G, n_size)
 
 
@@ -212,4 +244,18 @@ def draw_path_graph(G):
         for r in data["path"]:
             xs.append(r.x)
             ys.append(r.y)
+        plt.plot(xs, ys, "k")
+
+
+def draw_paths_graph(G):
+    for p, q, data in G.edges_iter(data=True):
+        plt.plot(p.x, p.y, "go")
+        plt.plot(q.x, q.y, "go")
+        xs = list()
+        ys = list()
+        path = data["paths"][0]
+        for path in data["paths"]:
+            for r in path:
+                xs.append(r.x)
+                ys.append(r.y)
         plt.plot(xs, ys, "k")
