@@ -31,7 +31,7 @@ class TVD(object):
         i_out = self.grid[initial.y, initial.x] == 0
         g_out = self.grid[goal.y, goal.x] == 0
         if i_out or g_out:
-            return list()
+            return None
         ds, inds = self.tree.query(initial.to_np_array_2d(), k=1)
         v_i = self.vor.nodes()[inds]
         ds, inds = self.tree.query(goal.to_np_array_2d(), k=1)

@@ -8,21 +8,18 @@ import tvd
 import matplotlib.pyplot as plt
 
 
-def topo_vor_sanity_test():
-    # m = tvd.read_pgm("imgs/gates.pgm")
+def tvd_example():
     m = tvd.read_pgm("imgs/strongly_connected.pgm")
-    # m = tvd.read_pgm("imgs/bars.pgm")
-    # G = tvd.topo_decomp_with_redundancy(m, 1)
     td = tvd.TVD(m)
-    # tvd.draw_path_graph(G)
+    initial = tvd.Point(30, 30)
+    goal = tvd.Point(500, 10)
+    sp = td.shortest_path(initial, goal)
     tvd.draw_paths_graph(td.get_graph())
-    sp = td.shortest_path(tvd.Point(30, 30), tvd.Point(500, 10))
     tvd.draw_path(sp)
-    # tvd.draw_topo_graph(G)
     plt.axis("off")
     plt.imshow(m)
 
 
 if __name__ == "__main__":
-    topo_vor_sanity_test()
+    tvd_example()
     plt.show()
