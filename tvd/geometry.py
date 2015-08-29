@@ -181,7 +181,7 @@ def topo_decomp(grid, b_dist=1, n_size=1):
                     if not G.has_edge(cn, node):
                         G.add_edge(cn, node, paths=list())
                     G[cn][node]["paths"].append(path)
-                    G[cn][node]["weight"] = len(path)
+                    G[cn][node]["distance"] = len(path)
                     break
                 else:
                     for inner_nbr in rg.neighbors(node):
