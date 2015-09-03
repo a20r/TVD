@@ -42,13 +42,13 @@ def draw_path_graph(G):
         plt.plot(xs, ys, "k")
 
 
-def draw_path(path):
+def draw_path(path, **kwargs):
     xs = list()
     ys = list()
     for r in path:
         xs.append(r.x)
         ys.append(r.y)
-    plt.plot(xs, ys, "y")
+    plt.plot(xs, ys, **kwargs)
 
 
 def draw_paths_graph(G, draw_nodes=True):
@@ -66,4 +66,14 @@ def draw_paths_graph(G, draw_nodes=True):
 
 
 def draw_multi_graph(G):
-    pass
+    colors = cm.jet(np.linspace(0, 1, len(G.nodes()) + 1))
+    for i, sg in enumerate(G.nodes()):
+        draw_paths_graph(sg, draw_nodes=False)
+        xs = list()
+        ys = list()
+        for node in sg.nodes():
+            xs.append(node.x)
+            ys.append(node.y)
+        plt.scatter(xs, ys, color=colors[i])
+    for _, _, data in G.edges_iter(data=True):
+        draw_path(data["path"], color="k")

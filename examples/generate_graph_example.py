@@ -13,9 +13,8 @@ def tvd_example():
     # m = tvd.read_pgm("imgs/Grelha4.pgm")
     # m = tvd.read_pgm("imgs/Maze.pgm")
     td = tvd.TVD(m)
-    labels = tvd.partition(td.get_graph(), 4)
-    tvd.draw_paths_graph(td.get_graph(), draw_nodes=False)
-    tvd.draw_clusters(td.get_graph(), labels)
+    mg = tvd.partition(td.get_graph(), 4)
+    tvd.draw_multi_graph(mg)
     plt.axis("off")
     plt.imshow(m)
 
