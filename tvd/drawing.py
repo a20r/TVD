@@ -63,3 +63,7 @@ def draw_paths_graph(G, draw_nodes=True):
                 xs.append(r.x)
                 ys.append(r.y)
         plt.plot(xs, ys, color="k")
+
+
+def draw_multi_graph(G):
+    pass
