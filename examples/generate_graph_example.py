@@ -10,13 +10,12 @@ import matplotlib.pyplot as plt
 
 def tvd_example():
     m = tvd.read_pgm("imgs/strongly_connected.pgm")
+    # m = tvd.read_pgm("imgs/Grelha4.pgm")
+    # m = tvd.read_pgm("imgs/Maze.pgm")
     td = tvd.TVD(m)
-    # initial = tvd.Point(30, 30)
-    # goal = tvd.Point(500, 10)
-    # sp = td.shortest_path(initial, goal)
-    tvd.draw_paths_graph(td.get_graph())
-    tvd.partition(td.get_graph(), 2)
-    # tvd.draw_path(sp)
+    labels = tvd.partition(td.get_graph(), 4)
+    tvd.draw_paths_graph(td.get_graph(), draw_nodes=False)
+    tvd.draw_clusters(td.get_graph(), labels)
     plt.axis("off")
     plt.imshow(m)
 

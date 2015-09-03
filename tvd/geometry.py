@@ -16,16 +16,25 @@ def is_grid_boundary(i, j, grid):
     return False
 
 
+def is_inside(p, grid):
+    in_x = p.x > 0 and p.x < grid.shape[1]
+    in_y = p.y > 0 and p.y < grid.shape[0]
+    return in_x and in_y
+
+
 def is_line_inside(xs, ys, grid, b_dist):
     xs = map(int, xs)
     ys = map(int, ys)
     p = point.Point(xs[0], ys[0])
     q = point.Point(xs[1], ys[1])
-    p_in = grid[p.y, p.x]
-    q_in = grid[q.y, q.x]
-    tc_p = too_close(p, b_dist, grid)
-    tc_q = too_close(q, b_dist, grid)
-    return p_in or q_in or tc_p or tc_q
+    if is_inside(p, grid) and is_inside(q, grid):
+        p_in = grid[p.y, p.x]
+        q_in = grid[q.y, q.x]
+        tc_p = too_close(p, b_dist, grid)
+        tc_q = too_close(q, b_dist, grid)
+        return p_in or q_in or tc_p or tc_q
+    else:
+        return False
 
 
 def too_close_xs(p, rad, grid, r):
@@ -133,6 +142,13 @@ def remove_close_nodes(G, grid, b_dist):
     return H
 
 
+def path_length(path):
+    length = 0.0
+    for i in xrange(len(path) - 1):
+        length += path[i].dist_to(path[i + 1])
+    return length
+
+
 def topo_decomp_with_redundancy(grid, b_dist):
     rg = redundant_graph(grid, b_dist)
     cns = critical_nodes(rg)
@@ -181,7 +197,7 @@ def topo_decomp(grid, b_dist=1, n_size=1):
                     if not G.has_edge(cn, node):
                         G.add_edge(cn, node, paths=list())
                     G[cn][node]["paths"].append(path)
-                    G[cn][node]["distance"] = len(path)
+                    G[cn][node]["distance"] = path_length(path)
                     break
                 else:
                     for inner_nbr in rg.neighbors(node):
