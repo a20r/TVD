@@ -10,11 +10,9 @@ import matplotlib.pyplot as plt
 
 def tvd_example():
     m = tvd.read_pgm("imgs/strongly_connected.pgm")
-    # m = tvd.read_pgm("imgs/Grelha4.pgm")
-    # m = tvd.read_pgm("imgs/Maze.pgm")
-    td = tvd.TVD(m)
-    mg = tvd.partition(td.get_graph(), 4)
-    tvd.draw_multi_graph(mg)
+    G = tvd.topo_decomp(m)
+    mg = tvd.partition(G, 4)
+    tvd.draw_multigraph(mg)
     plt.axis("off")
     plt.imshow(m)
 

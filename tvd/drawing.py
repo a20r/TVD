@@ -11,8 +11,8 @@ def draw_node(p, color):
 
 def draw_topo_graph(G):
     positions = dict()
-    for node_id in G.nodes():
-        positions[node_id] = G.node[node_id]['position'].to_list_2d()
+    for node in G.nodes():
+        positions[node] = node.to_list_2d()
     nx.draw_networkx_edges(G, positions)
     nx.draw_networkx_nodes(G, positions, node_size=30)
 
@@ -30,18 +30,6 @@ def draw_clusters(G, labels, **kwargs):
                 edgecolors="k", **kwargs)
 
 
-def draw_path_graph(G):
-    for p, q, data in G.edges_iter(data=True):
-        plt.plot(p.x, p.y, "go")
-        plt.plot(q.x, q.y, "go")
-        xs = list()
-        ys = list()
-        for r in data["path"]:
-            xs.append(r.x)
-            ys.append(r.y)
-        plt.plot(xs, ys, "k")
-
-
 def draw_path(path, **kwargs):
     xs = list()
     ys = list()
@@ -51,24 +39,23 @@ def draw_path(path, **kwargs):
     plt.plot(xs, ys, **kwargs)
 
 
-def draw_paths_graph(G, draw_nodes=True):
+def draw_path_graph(G, draw_nodes=True):
     for i, (p, q, data) in enumerate(G.edges_iter(data=True)):
         if draw_nodes:
             plt.plot(p.x, p.y, "go")
             plt.plot(q.x, q.y, "go")
         xs = list()
         ys = list()
-        for path in data["paths"]:
-            for r in path:
-                xs.append(r.x)
-                ys.append(r.y)
+        for r in data["path"]:
+            xs.append(r.x)
+            ys.append(r.y)
         plt.plot(xs, ys, color="k")
 
 
-def draw_multi_graph(G):
+def draw_multigraph(G):
     colors = cm.jet(np.linspace(0, 1, len(G.nodes()) + 1))
     for i, sg in enumerate(G.nodes()):
-        draw_paths_graph(sg, draw_nodes=False)
+        draw_path_graph(sg, draw_nodes=False)
         xs = list()
         ys = list()
         for node in sg.nodes():

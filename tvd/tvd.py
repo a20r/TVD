@@ -22,7 +22,7 @@ class TVD(object):
         self.b_dist = b_dist
         self.n_size = n_size
         self.G, self.rG, self.vor = geometry.topo_decomp(
-            self.grid, b_dist=b_dist, n_size=n_size)
+            self.grid, b_dist=b_dist, n_size=n_size, all_graphs=True)
         ps = point.to_np_array(self.vor.nodes())
         self.tree = spatial.KDTree(ps)
         return self

@@ -166,7 +166,7 @@ def topo_decomp_with_redundancy(grid, b_dist):
                 path.append(node)
                 if node in cns_set:
                     path = redundant_path(cn, node, path)
-                    G.add_node(cn, position=cn)
+                    G.add_node(cn)
                     G.add_edge(cn, node, path=path)
                     break
                 else:
@@ -177,11 +177,11 @@ def topo_decomp_with_redundancy(grid, b_dist):
     return H, rg
 
 
-def topo_decomp(grid, b_dist=1, n_size=1):
+def topo_decomp(grid, b_dist=1, n_size=1, all_graphs=False):
     rg, vor = topo_decomp_with_redundancy(grid, b_dist)
     cns = critical_nodes(rg)
     cns_set = set(cns)
-    G = nx.DiGraph()
+    G = nx.MultiDiGraph()
     for cn in cns:
         for nbr in rg.neighbors(cn):
             path = list()
@@ -193,17 +193,19 @@ def topo_decomp(grid, b_dist=1, n_size=1):
                 already_seen.add(node)
                 path += rg[parent][node]["path"]
                 if node in cns_set:
-                    G.add_node(cn, position=cn)
-                    if not G.has_edge(cn, node):
-                        G.add_edge(cn, node, paths=list())
-                    G[cn][node]["paths"].append(path)
-                    G[cn][node]["distance"] = path_length(path)
+                    dist = path_length(path)
+                    G.add_node(cn)
+                    G.add_edge(cn, node, path=path, distance=dist)
                     break
                 else:
                     for inner_nbr in rg.neighbors(node):
                         if not inner_nbr in already_seen:
                             to_search.append((node, inner_nbr))
-    return neighbourhood_reduction(G, n_size), rg, vor
+    final_G = neighbourhood_reduction(G, n_size)
+    if all_graphs:
+        return final_G, rg, vor
+    else:
+        return final_G
 
 
 def redundant_graph(grid, b_dist):
@@ -219,7 +221,7 @@ def redundant_graph(grid, b_dist):
             if not is_line_inside(xs, ys, grid, b_dist):
                 p = point.Point(xs[0], ys[0])
                 q = point.Point(xs[1], ys[1])
-                G.add_node(p, position=p)
-                G.add_node(q, position=q)
+                G.add_node(p)
+                G.add_node(q)
                 G.add_edge(p, q)
     return G

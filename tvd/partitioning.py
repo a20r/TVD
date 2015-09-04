@@ -11,11 +11,16 @@ def affinity_matrix(G):
     return maxes - dists
 
 
-def partition(G, n_parts):
+def determine_labels(G, n_parts):
     sc = cluster.SpectralClustering(
         n_clusters=n_parts, affinity="precomputed")
     af = affinity_matrix(G)
     labels = sc.fit_predict(af)
+    return labels
+
+
+def develop_multigraph(G, n_parts):
+    labels = determine_labels(G, n_parts)
     ld = dict()
     node_clusters = [list() for _ in xrange(max(labels) + 1)]
     subgraphs = list()
@@ -29,7 +34,11 @@ def partition(G, n_parts):
         if not ld[p] == ld[q]:
             p_sg = subgraphs[ld[p]]
             q_sg = subgraphs[ld[q]]
-            for path in data["paths"]:
-                dist = geometry.path_length(path)
-                MG.add_edge(p_sg, q_sg, path=path, distance=dist)
+            dist = geometry.path_length(data["path"])
+            MG.add_edge(p_sg, q_sg, path=data["path"], distance=dist)
     return MG
+
+
+def partition(G, n_parts):
+    mg = develop_multigraph(G, n_parts)
+    return mg
