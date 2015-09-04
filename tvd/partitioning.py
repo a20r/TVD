@@ -39,6 +39,28 @@ def develop_multigraph(G, n_parts):
     return MG
 
 
+def split_path(path, length, ratio=0.5):
+    dist = 0
+    for i in xrange(0, len(path) - 1):
+        dist += path[i].dist_to(path[i + 1])
+        diff = ratio * length - dist
+        if diff <= 0:
+            return path[:i], path[i - 1:]
+
+
 def partition(G, n_parts):
     mg = develop_multigraph(G, n_parts)
+    seen = set()
+    for g, h, data in mg.edges_iter(data=True):
+        path = data["path"]
+        dist = data["distance"]
+        edge_set = frozenset([path[0], path[-1]])
+        if not edge_set in seen:
+            left, right = split_path(path, dist)
+            leftr, rightr = list(reversed(left)), list(reversed(right))
+            g.add_edge(left[0], left[-1], path=left, distance=0.5 * dist)
+            g.add_edge(left[-1], left[0], path=leftr, distance=0.5 * dist)
+            h.add_edge(right[0], right[-1], path=right, distance=0.5 * dist)
+            h.add_edge(right[-1], right[0], path=rightr, distance=0.5 * dist)
+            seen.add(edge_set)
     return mg
