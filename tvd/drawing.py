@@ -55,12 +55,11 @@ def draw_path_graph(G, draw_nodes=True):
 def draw_multigraph(G):
     colors = cm.jet(np.linspace(0, 1, len(G.nodes()) + 1))
     for i, sg in enumerate(G.nodes()):
-        draw_path_graph(sg, draw_nodes=False)
         xs = list()
         ys = list()
+        for _, _, data in sg.edges_iter(data=True):
+            draw_path(data["path"], color=colors[i])
         for node in sg.nodes():
             xs.append(node.x)
             ys.append(node.y)
         plt.scatter(xs, ys, color=colors[i])
-    for _, _, data in G.edges_iter(data=True):
-        draw_path(data["path"], color="k")

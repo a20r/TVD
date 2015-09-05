@@ -6,6 +6,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 import tvd
 import matplotlib.pyplot as plt
+import networkx as nx
 
 
 def tvd_example():
@@ -13,6 +14,8 @@ def tvd_example():
     G = tvd.topo_decomp(m)
     mg = tvd.partition(G, 4)
     tvd.draw_multigraph(mg)
+    for g in mg.nodes():
+        print list(nx.eulerian_circuit(g))
     plt.axis("off")
     plt.imshow(m)
 

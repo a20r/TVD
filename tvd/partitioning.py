@@ -12,7 +12,7 @@ def affinity_matrix(G):
 
 
 def determine_labels(G, n_parts):
-    sc = cluster.SpectralClustering(
+        sc = cluster.SpectralClustering(
         n_clusters=n_parts, affinity="precomputed")
     af = affinity_matrix(G)
     labels = sc.fit_predict(af)
