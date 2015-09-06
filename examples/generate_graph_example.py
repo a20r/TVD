@@ -10,12 +10,13 @@ import networkx as nx
 
 
 def tvd_example():
+    # m = tvd.read_pgm("imgs/Grelha4.pgm")
     m = tvd.read_pgm("imgs/strongly_connected.pgm")
     G = tvd.topo_decomp(m)
     mg = tvd.partition(G, 4)
     tvd.draw_multigraph(mg)
-    for g in mg.nodes():
-        print list(nx.eulerian_circuit(g))
+    ecs = tvd.paths(mg)
+    print list(ecs[0])
     plt.axis("off")
     plt.imshow(m)
 

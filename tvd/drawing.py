@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import networkx as nx
 import matplotlib.cm as cm
+import matplotlib.animation as animation
 
 
 def draw_node(p, color):
@@ -63,3 +64,38 @@ def draw_multigraph(G):
             xs.append(node.x)
             ys.append(node.y)
         plt.scatter(xs, ys, color=colors[i])
+
+
+def play_simulation(mg, ecs, delay=0.1):
+    # draw_multigraph(mg)
+    vel = 10
+    def data_gen():
+        for i, ec in enumerate(ecs):
+            for u, v in ec:
+                for path in mg.nodes()[i].get_edge_data(u, v).values():
+                    for p in path["path"]:
+                        yield p
+    fig, ax = plt.subplots()
+    line, = ax.plot([], [], lw=2)
+    ax.set_ylim(0, 500)
+    ax.set_xlim(0, 500)
+    ax.grid()
+    xdata, ydata = [], []
+    def run(data):
+        # update the data
+        p = data
+        print p
+        xdata.append(p.x)
+        ydata.append(p.y)
+        xmin, xmax = ax.get_xlim()
+
+        # if t >= xmax:
+        #     ax.set_xlim(xmin, 2*xmax)
+        ax.figure.canvas.draw()
+        line.set_data(xdata, ydata)
+        return line,
+
+    ani = animation.FuncAnimation(fig, run, data_gen, blit=True, interval=10,
+        repeat=False)
+    plt.show()
+    return ani

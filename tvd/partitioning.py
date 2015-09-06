@@ -3,19 +3,14 @@ import sklearn.cluster as cluster
 import networkx as nx
 import numpy as np
 import geometry
-
-
-def affinity_matrix(G):
-    dists = nx.floyd_warshall_numpy(G, weight="distance")
-    maxes = np.amax(dists, axis=0)
-    return maxes - dists
+import postman
 
 
 def determine_labels(G, n_parts):
-        sc = cluster.SpectralClustering(
-        n_clusters=n_parts, affinity="precomputed")
-    af = affinity_matrix(G)
-    labels = sc.fit_predict(af)
+    sc = cluster.AgglomerativeClustering(
+        n_clusters=n_parts, linkage="ward")
+    dists = nx.floyd_warshall_numpy(G, weight="distance")
+    labels = sc.fit_predict(dists)
     return labels
 
 
@@ -41,7 +36,7 @@ def develop_multigraph(G, n_parts):
 
 def split_path(path, length, ratio=0.5):
     dist = 0
-    for i in xrange(0, len(path) - 1):
+    for i in xrange(len(path) - 1):
         dist += path[i].dist_to(path[i + 1])
         diff = ratio * length - dist
         if diff <= 0:
@@ -58,9 +53,23 @@ def partition(G, n_parts):
         if not edge_set in seen:
             left, right = split_path(path, dist)
             leftr, rightr = list(reversed(left)), list(reversed(right))
-            g.add_edge(left[0], left[-1], path=left, distance=0.5 * dist)
-            g.add_edge(left[-1], left[0], path=leftr, distance=0.5 * dist)
-            h.add_edge(right[0], right[-1], path=right, distance=0.5 * dist)
-            h.add_edge(right[-1], right[0], path=rightr, distance=0.5 * dist)
+            half_dist = 0.5 * dist
+            g.add_edge(left[0], left[-1], path=left, distance=half_dist)
+            g.add_edge(left[-1], left[0], path=leftr, distance=half_dist)
+            h.add_edge(right[0], right[-1], path=right, distance=half_dist)
+            h.add_edge(right[-1], right[0], path=rightr, distance=half_dist)
             seen.add(edge_set)
     return mg
+
+
+def weighted_topo_graph(G):
+    return G
+
+
+def paths(MG):
+    ps = list()
+    for g in MG.nodes():
+        tg = weighted_topo_graph(G)
+        pth = postman.single_chinese_postman_path(tg)
+        ps.append(pth)
+    return ps
