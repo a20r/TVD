@@ -63,13 +63,27 @@ def partition(G, n_parts):
 
 
 def weighted_topo_graph(G):
-    return G
+    H = nx.Graph()
+    for i, j, data in G.edges_iter(data=True):
+        H.add_edge(i, j, distance=data["distance"], weight=data["distance"])
+    return H
 
 
-def paths(MG):
+def node_orderings(MG):
     ps = list()
     for g in MG.nodes():
-        tg = weighted_topo_graph(G)
-        pth = postman.single_chinese_postman_path(tg)
+        tg = weighted_topo_graph(g)
+        _, pth = postman.single_chinese_postman_path(tg)
         ps.append(pth)
     return ps
+
+
+def tours(MG):
+    nos = node_orderings(MG)
+    paths = list()
+    for g, no in zip(MG.nodes(), nos):
+        path = list()
+        for i in xrange(len(no) - 1):
+            path.extend(g[no[i]][no[i + 1]][0]["path"])
+        paths.append(path)
+    return paths

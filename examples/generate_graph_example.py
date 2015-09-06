@@ -14,11 +14,11 @@ def tvd_example():
     m = tvd.read_pgm("imgs/strongly_connected.pgm")
     G = tvd.topo_decomp(m)
     mg = tvd.partition(G, 4)
-    tvd.draw_multigraph(mg)
-    ecs = tvd.paths(mg)
-    print list(ecs[0])
+    # tvd.draw_multigraph(mg)
+    ecs = tvd.tours(mg)
+    tvd.play_simulation(mg, ecs, m)
     plt.axis("off")
-    plt.imshow(m)
+    # plt.imshow(m)
 
 
 if __name__ == "__main__":

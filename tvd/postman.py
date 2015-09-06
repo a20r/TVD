@@ -24,8 +24,8 @@ def odd_graph(graph):
     result = nx.Graph()
     odd_nodes = [n for n in graph.nodes() if graph.degree(n) % 2 == 1]
     for u in odd_nodes:
-        paths = nx.shortest_path(graph, source=u, weight='distance')
-        lengths = nx.shortest_path_length(graph, source=u, weight='distance')
+        paths = nx.shortest_path(graph, source=u, weight='weight')
+        lengths = nx.shortest_path_length(graph, source=u, weight='weight')
         for v in odd_nodes:
             if u <= v:
                 continue
@@ -37,7 +37,7 @@ def odd_graph(graph):
 def edge_sum(graph):
     total = 0
     for u, v, data in graph.edges(data=True):
-        total += data['distance']
+        total += data['weight']
     return total
 
 
@@ -48,7 +48,7 @@ def matching_cost(graph, matching):
         if v <= u:
             continue
         data = graph[u][v]
-        cost += abs(data['distance'])
+        cost += abs(data['weight'])
     return cost
 
 
@@ -88,7 +88,7 @@ def build_eulerian_graph(graph, odd, matching):
         edge = odd[u][v]
         path = edge['path']
         for p, q in pairs(path):
-            eulerian_graph.add_edge(p, q, weight=graph[p][q]['distance'])
+            eulerian_graph.add_edge(p, q, weight=graph[p][q]['weight'])
 
     return eulerian_graph
 

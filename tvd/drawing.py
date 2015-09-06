@@ -53,7 +53,7 @@ def draw_path_graph(G, draw_nodes=True):
         plt.plot(xs, ys, color="k")
 
 
-def draw_multigraph(G):
+def draw_multigraph(G, plt):
     colors = cm.jet(np.linspace(0, 1, len(G.nodes()) + 1))
     for i, sg in enumerate(G.nodes()):
         xs = list()
@@ -66,36 +66,23 @@ def draw_multigraph(G):
         plt.scatter(xs, ys, color=colors[i])
 
 
-def play_simulation(mg, ecs, delay=0.1):
-    # draw_multigraph(mg)
-    vel = 10
+def play_simulation(mg, ecs, grid, delay=0.1):
     def data_gen():
-        for i, ec in enumerate(ecs):
-            for u, v in ec:
-                for path in mg.nodes()[i].get_edge_data(u, v).values():
-                    for p in path["path"]:
-                        yield p
+        for k in xrange(100000):
+            yield [ec[k % len(ec)] for ec in ecs]
     fig, ax = plt.subplots()
-    line, = ax.plot([], [], lw=2)
-    ax.set_ylim(0, 500)
-    ax.set_xlim(0, 500)
-    ax.grid()
-    xdata, ydata = [], []
-    def run(data):
-        # update the data
-        p = data
-        print p
-        xdata.append(p.x)
-        ydata.append(p.y)
-        xmin, xmax = ax.get_xlim()
-
-        # if t >= xmax:
-        #     ax.set_xlim(xmin, 2*xmax)
+    draw_multigraph(mg, ax)
+    ax.imshow(grid)
+    scatter = ax.scatter([], [], s=100)
+    def run(ps):
+        data = np.zeros((len(ps), 2))
+        for i, p in enumerate(ps):
+            data[i][0] = p.x
+            data[i][1] = p.y
+        scatter.set_offsets(data)
+        scatter.set_sizes([100 for _ in ps])
         ax.figure.canvas.draw()
-        line.set_data(xdata, ydata)
-        return line,
-
-    ani = animation.FuncAnimation(fig, run, data_gen, blit=True, interval=10,
+        return scatter,
+    ani = animation.FuncAnimation(fig, run, data_gen, blit=True, interval=3,
         repeat=False)
     plt.show()
-    return ani
