@@ -132,12 +132,15 @@ def neighbourhood_reduction(G, k):
     return G
 
 
-def remove_close_nodes(G, grid, b_dist):
+def remove_close_nodes(G, grid, b_dist, l_dist):
     H = G.copy()
     for n in G.nodes():
         if n in H.nodes():
             is_leaf = len(G.neighbors(n)) == 1
+            path = G[n][G.neighbors(n)[0]]["path"]
             if is_leaf and too_close(n, b_dist + 1, grid):
+                H.remove_node(n)
+            elif is_leaf and path_length(path) < l_dist:
                 H.remove_node(n)
     return H
 
@@ -149,7 +152,7 @@ def path_length(path):
     return length
 
 
-def topo_decomp_with_redundancy(grid, b_dist):
+def topo_decomp_with_redundancy(grid, b_dist, l_dist):
     rg = redundant_graph(grid, b_dist)
     cns = critical_nodes(rg)
     cns_set = set(cns)
@@ -173,12 +176,12 @@ def topo_decomp_with_redundancy(grid, b_dist):
                     for inner_nbr in rg.neighbors(node):
                         if not inner_nbr in already_seen:
                             to_search.append(inner_nbr)
-    H = remove_close_nodes(G, grid, b_dist)
-    return H, rg
+    return G, rg
 
 
-def topo_decomp(grid, b_dist=1, n_size=1, all_graphs=False):
-    rg, vor = topo_decomp_with_redundancy(grid, b_dist)
+def topo_decomp(grid, b_dist=1, n_size=1, l_dist=1, all_graphs=False):
+    with_leaves, vor = topo_decomp_with_redundancy(grid, b_dist, l_dist)
+    rg = remove_close_nodes(with_leaves, grid, b_dist, l_dist)
     cns = critical_nodes(rg)
     cns_set = set(cns)
     G = nx.MultiDiGraph()
@@ -203,13 +206,13 @@ def topo_decomp(grid, b_dist=1, n_size=1, all_graphs=False):
                             to_search.append((node, inner_nbr))
     final_G = neighbourhood_reduction(G, n_size)
     if all_graphs:
-        return final_G, rg, vor
+        return final_G, rg, with_leaves, vor
     else:
         return final_G
 
 
 def redundant_graph(grid, b_dist):
-    grid = fill_border(grid == 0)
+    grid = fill_border(grid < 100)
     points = boundary_points(grid)
     vor = spatial.Voronoi(points)
     G = nx.Graph()
